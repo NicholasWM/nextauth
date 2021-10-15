@@ -24,22 +24,34 @@ type AuthProviderProps = {
 
 export const AuthContext = createContext({} as AuthContextData)
 
+type MeResponse = {
+    email:string,
+    permissions:string[],
+    roles:string[]
+}
+type SessionsResponse = {
+    token:string,
+    refreshToken:string,
+    permissions:string[],
+    roles:string[]
+}
+
 export function AuthProvider({children}: AuthProviderProps){
     const [user, setUser] = useState<User>()
     const isAuthenticated = !!user;
     useEffect(()=>{
         const {'nextauth.token': token} = parseCookies()
         if(token){
-            api.get('/me').then(({data}) => {
-                const {email, permissions, roles} = data
+            api.get<MeResponse>('/me').then((response) => {
+                const {email, permissions, roles} = response?.data
                 setUser({email, permissions, roles})
             })
         }
     },[])
     async function signIn({email, password}: SignInCredentials){
         try {
-            const {data} = await api.post('sessions', {email, password})
-            const {token, refreshToken, permissions, roles} = data
+            const response = await api.post<SessionsResponse>('sessions', {email, password})
+            const {token, refreshToken, permissions, roles} = response?.data
             
             setCookie(undefined, 'nextauth.token', token, {
                 maxAge: 60 * 60 * 24 * 30,// 30 dias //Quanto tempo mantem o cookie salvo no navegador
