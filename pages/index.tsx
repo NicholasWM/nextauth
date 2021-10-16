@@ -15,7 +15,6 @@ const Home: NextPage = () => {
       email, password
     }
     signIn(data)
-    console.log('Hello World')
   }
   return (
     <form onSubmit={handleSubmit} className={styles.container}>
